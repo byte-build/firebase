@@ -2,16 +2,20 @@ rules_version = '2'
 
 service cloud.firestore {
 	match /databases/{database}/documents {
-		match /users/{uid} {
-			allow read: if isSignedInWith(uid)
+		match /users/{user} {
+			allow read: if isSignedInWith(user)
+		}
+
+		match /hackathons/{hackathon} {
+			allow read
 		}
 
 		function isSignedIn() {
 			return request.auth != null
 		}
 
-		function isSignedInWith(uid) {
-			return isSignedIn() && request.auth.uid == uid
+		function isSignedInWith(id) {
+			return isSignedIn() && request.auth.uid == id
 		}
 	}
 }
