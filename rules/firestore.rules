@@ -6,10 +6,6 @@ service cloud.firestore {
 			allow read: if isSignedInWith(user)
 		}
 
-		match /hackathons/{hackathon} {
-			allow read
-		}
-
 		function isSignedIn() {
 			return request.auth != null
 		}
