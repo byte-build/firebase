@@ -25,8 +25,7 @@ service cloud.firestore {
 					newData().skill == 'advanced'
 				) &&
 				newData().tags is list &&
-					newData().tags.size() > 1 &&
-					newData().tags[0] is string &&
+					(newData().tags.size() == 0 || newData().tags[0] is string) &&
 				newData().time is map &&
 					newData().time.keys().hasOnly(['start', 'end', 'range']) &&
 					newData().time.start is timestamp &&
