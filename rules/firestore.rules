@@ -3,15 +3,68 @@ rules_version = '2'
 service cloud.firestore {
 	match /databases/{database}/documents {
 		match /users/{user} {
-			allow read: if isSignedInWith(user)
+			allow get: if isSignedInWith(user)
 		}
-
+		
+		match /hackathons/{hackathon} {
+			allow create: if
+				isSignedIn() &&
+				newData().keys().hasOnly(['name', 'subtitle', 'bits', 'participants', 'skill', 'tags', 'time', 'admins']) &&
+				newData().name is string &&
+					newData().name.size() <= 100 &&
+				newData().subtitle is string &&
+					newData().subtitle.size() <= 350 &&
+				newData().bits is number &&
+					newData().bits > 0 &&
+					newData().bits <= getUser(user()).bits &&
+				newData().participants == 0 &&
+				(
+					newData().skill == null ||
+					newData().skill == 'beginner' ||
+					newData().skill == 'intermediate' ||
+					newData().skill == 'advanced'
+				) &&
+				newData().tags is list &&
+					newData().tags.size() > 1 &&
+					newData().tags[0] is string &&
+				newData().time is map &&
+					newData().time.keys().hasOnly(['start', 'end', 'range']) &&
+					newData().time.start is timestamp &&
+						newData().time.start.toMillis() >= now().toMillis() &&
+					newData().time.end is timestamp &&
+						newData().time.end.toMillis() > newData().time.start.toMillis() &&
+					newData().time.range == newData().time.end.toMillis() - newData().time.start.toMillis() &&
+				newData().admins is map &&
+					newData().admins.keys().hasOnly([user()]) &&
+					newData().admins[user()] is map &&
+						newData().admins[user()].keys().hasOnly(['image', 'name', 'role']) &&
+						newData().admins[user()].image == getUser(user()).image &&
+						newData().admins[user()].name == getUser(user()).name &&
+						newData().admins[user()].role == 'owner'
+		}
+		
+		function user() {
+			return request.auth.uid
+		}
+		
 		function isSignedIn() {
 			return request.auth != null
 		}
-
+		
 		function isSignedInWith(id) {
-			return isSignedIn() && request.auth.uid == id
+			return isSignedIn() && user() == id
+		}
+		
+		function now() {
+			return request.time
+		}
+		
+		function newData() {
+			return request.resource.data
+		}
+		
+		function getUser(id) {
+			return get(/databases/$(database)/documents/users/$(id)).data
 		}
 	}
 }
