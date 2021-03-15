@@ -18,14 +18,13 @@ service cloud.firestore {
 					newData().bits > 0 &&
 					newData().bits <= getUser(user()).bits &&
 				newData().participants == 0 &&
-				(
-					newData().skill == null ||
-					newData().skill == 'beginner' ||
-					newData().skill == 'intermediate' ||
-					newData().skill == 'advanced'
-				) &&
+				newData().skill is list &&
+					newData().skill.size() > 0 &&
+					newData().skill.size() <= 3 &&
+					newData().skill[0] is string &&
 				newData().tags is list &&
 					(newData().tags.size() == 0 || newData().tags[0] is string) &&
+					newData().tags.size() <= 10 &&
 				newData().time is map &&
 					newData().time.keys().hasOnly(['start', 'end', 'range']) &&
 					newData().time.start is timestamp &&
