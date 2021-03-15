@@ -15,7 +15,7 @@ service cloud.firestore {
 				newData().subtitle is string &&
 					newData().subtitle.size() <= 350 &&
 				newData().bits is number &&
-					newData().bits > 0 &&
+					newData().bits >= 100 &&
 					newData().bits <= getUser(user()).bits &&
 				newData().participants == 0 &&
 				newData().skill is list &&
