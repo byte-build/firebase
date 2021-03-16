@@ -2,8 +2,37 @@ rules_version = '2'
 
 service firebase.storage {
 	match /b/{bucket}/o {
-		match /{file=**} {
-			allow read, write: if false
+		match /hackathons/{hackathon}/description/{image} {
+			allow create: if
+				size() < 30 * 1024 * 1024 &&
+				type().startsWith('image/') &&
+				metadata().keys().hasOnly(['name', 'user']) &&
+					metadata().name is string &&
+						metadata().name.size() > 0 &&
+						metadata().name.size() <= 100 &&
+					metadata().user is string &&
+						isSignedInWith(metadata().user)
+				
+		}
+		
+		function isSignedIn() {
+			return request.auth != null
+		}
+		
+		function isSignedInWith(id) {
+			return isSignedIn() && user() == id
+		}
+		
+		function size() {
+			return request.resource.size
+		}
+		
+		function type() {
+			return request.resource.contentType
+		}
+		
+		function metadata() {
+			return request.resource.metadata
 		}
 	}
 }
