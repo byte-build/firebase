@@ -5,14 +5,17 @@ service firebase.storage {
 		match /hackathons/{hackathon}/description/{image} {
 			allow create: if
 				size() < 30 * 1024 * 1024 &&
-				type().startsWith('image/') &&
+				type().matches('image/.*') &&
 				metadata().keys().hasOnly(['name', 'user']) &&
 					metadata().name is string &&
 						metadata().name.size() > 0 &&
 						metadata().name.size() <= 100 &&
 					metadata().user is string &&
 						isSignedInWith(metadata().user)
-				
+		}
+		
+		function user() {
+			return request.auth.uid
 		}
 		
 		function isSignedIn() {
